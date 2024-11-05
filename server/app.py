@@ -48,6 +48,18 @@ class ShowArticle(Resource):
 
         return {'message': 'Maximum pageview limit reached'}, 401
     
+class Users(Resource):
+    def post(self):
+        form_json = request.get_json()
+        new_user = User(
+            username=form_json["username"]
+        )
+        db.session.add(new_user)
+        db.session.commit()
+        session["user_id"] = new_user.id
+        return new_user.to_dict(),201
+api.add_resource(Users, '/signup')
+
 class Login(Resource):
     def post(self):
         data = request.get_json()
@@ -62,7 +74,8 @@ class Login(Resource):
         
 class Logout(Resource):
     def delete(self):
-        session['user_id'] = None
+        if session.get("user_id"):
+            session['user_id'] = None
         return {}, 204
 
 class CheckSession(Resource):
